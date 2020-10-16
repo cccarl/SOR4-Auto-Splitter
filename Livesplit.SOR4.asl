@@ -28,7 +28,7 @@ init{
 }
 
 update{
-    if (current.currentSectionFrames > old.currentSectionFrames && current.currentSectionFrames < (old.currentSectionFrames + 60) && current.currentSectionFrames >= 0){
+    if ((current.currentSectionFrames > old.currentSectionFrames && current.currentSectionFrames < (old.currentSectionFrames + 60) && current.currentSectionFrames >= 0) || current.currentSectionFrames == old.currentSectionFrames){
         vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
     }
 }
