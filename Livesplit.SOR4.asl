@@ -5,16 +5,7 @@ state("SOR4", "V05-s r11096"){
 }
 
 startup{
-    
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
-
-    vars.gameTime = 0;
-
-    vars.restartVariables = (EventHandler)((s, e) => {
-        vars.gameTime = 0;
-    });
-    timer.OnStart += vars.restartVariables;
-
 }
 
 init{
@@ -32,10 +23,12 @@ init{
         case 0x15B1000: version = "V05-s r11096"; break;
         default: version = "Not Supported"; break;
     }
+
+    vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
 }
 
 update{
-    if ((((current.currentSectionFrames + current.totalFrameCount) * 1000/60) < (vars.gameTime + 10000) && ((current.currentSectionFrames + current.totalFrameCount)* 1000/60) > (vars.gameTime - 10000)) || vars.gameTime == 0){
+    if (current.currentSectionFrames > old.currentSectionFrames && current.currentSectionFrames < (old.currentSectionFrames + 60) && current.currentSectionFrames >= 0){
         vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
     }
 }
@@ -57,8 +50,4 @@ gameTime{
 }
 
 split{
-}
-
-shutdown{
-    timer.OnStart -= vars.restartVariables;
 }
