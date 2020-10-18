@@ -1,6 +1,7 @@
 state("SOR4", "V05-s r11096"){
     int submenusOpen : 0x01444058, 0x0, 0x68, 0x28;
-    int currentSectionFrames : 0x01448B00, 0x90, 0x30; // not 100% stable
+    int inGameplay : 0x01448B00, 0x8C; // 0 when in a menu / loading screen, around 500 when in a level
+    int currentSectionFrames : 0x01448B00, 0x90, 0x30;
     int totalFrameCount : 0x01448B00, 0xA8, 0x28;
 }
 
@@ -28,13 +29,19 @@ init{
 }
 
 update{
-    if ((current.currentSectionFrames > old.currentSectionFrames && current.currentSectionFrames < (old.currentSectionFrames + 60) && current.currentSectionFrames >= 0) || current.currentSectionFrames == old.currentSectionFrames){
+    if (current.totalFrameCount < 0 || current.currentSectionFrames <= 0){
+        return true;
+    }
+    if ((current.inGameplay == 0 && current.totalFrameCount != 0) || (current.totalFrameCount > old.totalFrameCount)){
+        vars.gameTime = current.totalFrameCount * 1000/60;
+    }
+    else if (current.inGameplay != 0 && old.currentSectionFrames != current.currentSectionFrames && old.currentSectionFrames + 60 > current.currentSectionFrames){
         vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
     }
 }
 
 start{
-    return old.currentSectionFrames == 0 && current.currentSectionFrames > 0 && current.currentSectionFrames < 60;
+    return current.currentSectionFrames > 0 && current.currentSectionFrames < 60;
 }
 
 reset{
