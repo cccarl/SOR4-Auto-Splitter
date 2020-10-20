@@ -6,6 +6,9 @@ state("SOR4", "V05-s r11096"){
 
 startup{
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
+
+    vars.gameTimeUpdateStopwatch = new Stopwatch();
+    vars.gameTimeUpdateStopwatch.Start();
 }
 
 init{
@@ -29,15 +32,16 @@ init{
 }
 
 update{
-    // making sure that the updated game time isn't a completely wrong value (inconsistent pointers)
     vars.updatedGameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
-    if (vars.gameTime + 5000 > vars.updatedGameTime && vars.gameTime - 5000 < vars.updatedGameTime || vars.updatedGameTime > 0 && vars.updatedGameTime < 1000){
+    // gameTime updates when the new update is in a reasonable range (in case the pointers show bad data), or if there hasn't been an update for 1 second (in a reset or in the rare case it's stuck)
+    if (vars.gameTime + 1000 > vars.updatedGameTime && vars.gameTime - 1000 < vars.updatedGameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 1000){
         vars.gameTime = vars.updatedGameTime;
+        vars.gameTimeUpdateStopwatch.Restart();
     }
 }
 
 start{
-    return current.currentSectionFrames > 0 && current.currentSectionFrames < 60;
+    return current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0;
 }
 
 reset{
