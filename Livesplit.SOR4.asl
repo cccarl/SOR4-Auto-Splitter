@@ -8,8 +8,7 @@ startup{
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
     settings.Add("splits", false, "Auto Splits");
     settings.SetToolTip("splits", "NOTE: These splits only fit for full game runs since they work by counting loading screens after the IGT starts."+
-    "\nFor example, while doing a run of Y Island from Stage Select and getting to the third loading screen, the Diva split will be triggered."+
-    "\nIf the auto splitter ever splits (or doesn't split) by mistake, undoing and skipping splits will fix it (not manually splitting).");
+    "\nFor example, while doing a run of Y Island from Stage Select and getting to the third loading screen, the Diva split will be triggered.");
 
     string[] stageNames = new string[12] {"The Streets", "Police Precinct", "Cargo Ship", "Old Pier", "Underground", "Chinatown", "Skytrain", "Art Gallery", "Y Tower", "To The Concert", "Airplane", "Y Island"};
     for (int i = 1; i <= 12; i++){
@@ -58,7 +57,7 @@ startup{
 
     vars.gameTimeUpdateStopwatch = new Stopwatch();
     vars.gameTimeUpdateStopwatch.Start();
-    vars.splitsDelay = new Stopwatch(); // slight delay to make sure it's done when the IGT is fully stopped
+    vars.splitsDelay = new Stopwatch(); // slight splits delay to make sure it's done when the IGT is fully stopped
     vars.totalFrameCounterUpdates = 0; // serves as a split ID depending on how many times totalFrameCount has been updated (in every laoding screen and end of stage)
     vars.totalFrameCountBackup = 0; // saves current value of the total frame counter when it goes up
     vars.splitNow = false;
@@ -68,16 +67,6 @@ startup{
         vars.splitsDelay.Reset();
     });
     timer.OnSplit += vars.splitActions;
-
-    vars.undoSplitActions = (EventHandler)((s, e) => {
-        vars.totalFrameCounterUpdates -= 1;
-    });
-    timer.OnUndoSplit += vars.undoSplitActions;
-
-    vars.skipSplitActions = (EventHandler)((s, e) => {
-        vars.totalFrameCounterUpdates += 1;
-    });
-    timer.OnSkipSplit += vars.skipSplitActions;
 
 }
 
@@ -98,7 +87,6 @@ init{
     }
 
     vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
-    vars.updatedGameTime = vars.gameTime;
 }
 
 update{
@@ -149,6 +137,4 @@ split{
 
 shutdown {
     timer.OnSplit -= vars.splitActions;
-    timer.OnUndoSplit -= vars.undoSplitActions;
-    timer.OnSkipSplit -= vars.skipSplitActions;
 }
