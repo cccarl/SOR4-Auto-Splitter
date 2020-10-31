@@ -1,6 +1,6 @@
 // todo list
-// stageId has failed, next time i hope to catch it and see if cheat engine gives me a better pointer path
-// make sure that adding the "current.submenusOpen == 0" condition to update gameTime really fixes the section counter going up when unpausing (sometimes)
+// stageId has failed, next time i hope to catch it and see if cheat engine gives me a better pointer path -> backup "fixes" that?
+// make sure that adding the "current.submenusOpen == 0" condition to update gameTime really fixes the section counter going up when unpausing (sometimes) -> works?
 // add splits based on music changing for old pier estel and skytrain stel
 
 state("SOR4", "V05-s r11096"){
@@ -8,6 +8,7 @@ state("SOR4", "V05-s r11096"){
     int currentSectionFrames : 0x01448B00, 0x90, 0x30;
     int totalFrameCount : 0x01448B00, 0xA8, 0x28;
     string4 stageId : 0x01448B00, 0x98, 0x10, 0x118, 0x10, 0x22; // FAKE ID, it's actually part of the name of the music file at the start of the current section
+    string4 stageIdBackup : 0x0144B570, 0x38, 0x30, 0x20, 0x90, 0x20, 0x22; // another fake ID, based on the current music playing
     string100 currentMusic : 0x0144B570, 0x38, 0x30, 0x20, 0x90, 0x20, 0xC;
 }
 
@@ -168,13 +169,34 @@ update{
         }
     }
 
-    if (current.stageId != old.stageId){
+    if (current.stageId != old.stageId || current.stageIdBackup != old.stageIdBackup){
         print("[ASL] LEVEL ID: " + current.stageId);
+        print("[ASL] LEVEL ID BACKUP: " + current.stageIdBackup);
         short stageStrToInt = Convert.ToInt16(current.stageId);
-        if (stageStrToInt >= 1 && stageStrToInt <= 12 && !vars.enteredStages[stageStrToInt - 1]){
-            vars.enteredStages[stageStrToInt - 1] = true;
-            vars.currentStage = stageStrToInt;
-            vars.currentSectionId = 0;
+        short stageStrToIntBackup = Convert.ToInt16(current.stageIdBackup);
+        // during runs stage changes only when it hasn't been entered before
+        if (timer.CurrentPhase != TimerPhase.NotRunning){
+            if (stageStrToInt >= 1 && stageStrToInt <= 12 && !vars.enteredStages[stageStrToInt - 1]){
+                vars.enteredStages[stageStrToInt - 1] = true;
+                vars.currentStage = stageStrToInt;
+                vars.currentSectionId = 0;
+            }
+            else if (stageStrToIntBackup >= 1 && stageStrToIntBackup <= 12 && !vars.enteredStages[stageStrToIntBackup - 1]){
+                vars.enteredStages[stageStrToIntBackup - 1] = true;
+                vars.currentStage = stageStrToIntBackup;
+                vars.currentSectionId = 0;
+            }
+        }
+        // outside of runs it will always change
+        else{
+            if (stageStrToInt >= 1 && stageStrToInt <= 12){
+                vars.currentStage = stageStrToInt;
+                vars.currentSectionId = 0;
+            }
+            else if (stageStrToIntBackup >= 1 && stageStrToIntBackup <= 12){
+                vars.currentStage = stageStrToIntBackup;
+                vars.currentSectionId = 0;
+            }
         }
         print("[ASL] CURRENT STAGE VAR: " + vars.currentStage);
         vars.UpdateTextComponent("stage", vars.currentStage.ToString());
