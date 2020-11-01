@@ -1,6 +1,3 @@
-// todo list
-// add splits based on music changing for old pier estel and skytrain stel
-
 state("SOR4", "V05-s r11096"){
     int submenusOpen : 0x01444058, 0x0, 0x68, 0x28;
     int currentSectionFrames : 0x01448B00, 0x90, 0x30;
@@ -29,7 +26,7 @@ startup{
         }
     }
 
-    settings.Add("start_bossRush", false, "Boss Rush", "start");
+    settings.Add("start_llenge_01_bossrun_v3", false, "Boss Rush", "start");
     settings.Add("splits_stage1_1", false, "Streets", "splits_stage1");
     settings.Add("splits_stage1_2", false, "Sewers", "splits_stage1");
     settings.Add("splits_stage1_3", true, "Diva", "splits_stage1");
@@ -41,6 +38,7 @@ startup{
     settings.Add("splits_stage3_1c", false, "Hallway", "splits_stage3");
     settings.Add("splits_stage3_2", true, "Nora", "splits_stage3");
     settings.Add("splits_stage4_1", false, "Pier", "splits_stage4");
+    settings.Add("splits_stage4_bossMusic", false, "Estel Start", "splits_stage4");
     settings.Add("splits_stage4_2", true, "Estel", "splits_stage4");
     settings.Add("splits_stage5_1", false, "Underground", "splits_stage5");
     settings.Add("splits_stage5_2", false, "Bar", "splits_stage5");
@@ -50,6 +48,7 @@ startup{
     settings.Add("splits_stage6_2b", false, "Dojo - Donovan Room", "splits_stage6");
     settings.Add("splits_stage6_2c", false, "Dojo - Pheasant Room", "splits_stage6");
     settings.Add("splits_stage6_3", true, "Shiva", "splits_stage6");
+    settings.Add("splits_stage7_bossMusic", false, "Estel Start", "splits_stage7");
     settings.Add("splits_stage7_1", true, "Estel", "splits_stage7");
     settings.Add("splits_stage8_1", false, "Gallery", "splits_stage8");
     settings.Add("splits_stage8_2", true, "Beyo and Riha", "splits_stage8");
@@ -77,14 +76,12 @@ startup{
     vars.gameTimeUpdateStopwatch.Start();
     vars.splitNow = false;
     vars.totalFrameCountBackup = 0; // saves current value of the total frame counter when it goes up
-
+    vars.currentLevel = "";
 
     vars.startActions = (EventHandler)((s, e) => {
         vars.totalFrameCountBackup = 0;
     });
     timer.OnStart += vars.startActions;
-
-
 }
 
 init{
@@ -147,7 +144,7 @@ update{
         vars.gameTime = vars.updatedGameTime;
         vars.gameTimeUpdateStopwatch.Restart();
 
-        // the "total frames counter" backup gets updated when gameTime gets updated and it's lower then the value in memory
+        // the "total frames counter" backup gets updated when gameTime gets updated and it's lower then the value in memory, this also triggers splits
         if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup){
             vars.totalFrameCountBackup = current.totalFrameCount;
             vars.splitNow = true;
@@ -172,8 +169,7 @@ update{
 
 start{
     return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0 && settings["start_any"]) 
-        || (current.levelName != old.levelName && current.levelName != null && settings["start_" + current.levelName])
-        || (current.currentMusic == "Music_BossRush!A00_Diva" && settings["start_bossRush"]);
+        || (current.levelName != old.levelName && current.levelName != null && settings["start_" + current.levelName]);
 }
 
 reset{
@@ -190,9 +186,11 @@ gameTime{
 
 split{
     return vars.splitNow && settings["splits_" + vars.currentLevel]
-        || current.currentMusic != old.currentMusic && old.currentMusic != null && old.currentMusic.Contains("BossRush") && current.submenusOpen == 0 && settings["splits_bossRush_newBoss"];
+        || current.currentMusic != old.currentMusic && (old.currentMusic != null && old.currentMusic.Contains("BossRush") && current.submenusOpen == 0 && settings["splits_bossRush_newBoss"]
+                                                    || old.currentMusic == "Music_Level04!G00_end" && current.currentMusic == "Music_Level04!BOSS" && settings["splits_stage4_bossMusic"]
+                                                    || old.currentMusic == "Music_Level07!C00_LastWave" && current.currentMusic == "Music_Level07!BOSS" && settings["splits_stage7_bossMusic"]);
 }
 
-shutdown {
+shutdown{
     timer.OnStart -= vars.startActions;
 }
