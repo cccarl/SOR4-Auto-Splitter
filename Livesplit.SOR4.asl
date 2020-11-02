@@ -2,72 +2,86 @@ state("SOR4", "V05-s r11096"){
     int submenusOpen : 0x01444058, 0x0, 0x68, 0x28;
     int currentSectionFrames : 0x01448B00, 0x90, 0x30;
     int totalFrameCount : 0x01448B00, 0xA8, 0x28;
+    string100 currentMusic : 0x0144B570, 0x38, 0x30, 0x20, 0x90, 0x20, 0xC;
+    string40 levelName : 0x01443878, 0x0, 0x60, 0x8, 0x28, 0x10, 0x88, 0x3E;
 }
 
 startup{
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
-    settings.Add("splits", false, "Auto Splits");
-    settings.SetToolTip("splits", "NOTE: These splits only fit for full game runs since they work by counting loading screens after the IGT starts."+
-    "\nFor example, while doing a run of Y Island from Stage Select and getting to the third loading screen, the Diva split will be triggered.");
+
+    settings.Add("start", true, "Auto Start");
+    settings.Add("start_any", true, "Any Stage", "start");
+    settings.SetToolTip("start_any", "Also for Boss Rush");
+    settings.Add("splits", true, "Auto Splits");
 
     string[] stageNames = new string[12] {"The Streets", "Police Precinct", "Cargo Ship", "Old Pier", "Underground", "Chinatown", "Skytrain", "Art Gallery", "Y Tower", "To The Concert", "Airplane", "Y Island"};
+
     for (int i = 1; i <= 12; i++){
-        settings.Add("splits_stage_" + i.ToString(), true, "Stage " + i.ToString() + " - " + stageNames[i-1], "splits");
+        settings.Add("splits_stage" + i, true, "Stage " + i + " - " + stageNames[i-1], "splits");
+        if (i == 3 || i == 10){
+            settings.Add("start_stage" + i + "_1a", false, "Stage " + i + " - " + stageNames[i-1], "start");
+        }
+        else{
+            settings.Add("start_stage" + i + "_1", false, "Stage " + i + " - " + stageNames[i-1], "start");
+        }
     }
-    settings.Add("splits_id1", false, "Streets", "splits_stage_1");
-    settings.Add("splits_id2", false, "Electric Streets", "splits_stage_1");
-    settings.Add("splits_id3", true, "Diva", "splits_stage_1");
-    settings.Add("splits_id4", false, "Jail", "splits_stage_2");
-    settings.Add("splits_id5", false, "HQ", "splits_stage_2");
-    settings.Add("splits_id6", true, "Commissioner", "splits_stage_2");
-    settings.Add("splits_id7", false, "Outside", "splits_stage_3");
-    settings.Add("splits_id8", false, "Inside", "splits_stage_3");
-    settings.Add("splits_id9", false, "Hallway", "splits_stage_3");
-    settings.Add("splits_id10", true, "Nora", "splits_stage_3");
-    settings.Add("splits_id11", false, "Pier", "splits_stage_4");
-    settings.Add("splits_id12", true, "Estel", "splits_stage_4");
-    settings.Add("splits_id13", false, "Underground", "splits_stage_5");
-    settings.Add("splits_id14", false, "Bar", "splits_stage_5");
-    settings.Add("splits_id15", true, "Barbon", "splits_stage_5");
-    settings.Add("splits_id16", false, "Streets", "splits_stage_6");
-    settings.Add("splits_id17", false, "Dojo - Galsia Room", "splits_stage_6");
-    settings.Add("splits_id18", false, "Dojo - Donovan Room", "splits_stage_6");
-    settings.Add("splits_id19", false, "Dojo - Pheasant Room", "splits_stage_6");
-    settings.Add("splits_id20", true, "Shiva", "splits_stage_6");
-    settings.Add("splits_id21", true, "Estel", "splits_stage_7");
-    settings.Add("splits_id22", false, "Gallery", "splits_stage_8");
-    settings.Add("splits_id23", true, "Beyo and Riha", "splits_stage_8");
-    settings.Add("splits_id24", false, "Sauna", "splits_stage_9");
-    settings.Add("splits_id25", false, "Elevator", "splits_stage_9");
-    settings.Add("splits_id26", true, "Max", "splits_stage_9");
-    settings.Add("splits_id27", false, "Rooftops - Arrival", "splits_stage_10");
-    settings.Add("splits_id28", false, "Rooftops - Advance", "splits_stage_10");
-    settings.Add("splits_id29", false, "Rooftops - Wrecking Balls", "splits_stage_10");
-    settings.Add("splits_id30", true, "DJ K-Washi", "splits_stage_10");
-    settings.Add("splits_id31", false, "Platform ", "splits_stage_11");
-    settings.Add("splits_id32", false, "Boarding the Airplane", "splits_stage_11");
-    settings.Add("splits_id33", false, "Inside the Airplane", "splits_stage_11");
-    settings.Add("splits_id34", true, "Mr. Y", "splits_stage_11");
-    settings.Add("splits_id35", false, "Wreckage", "splits_stage_12");
-    settings.Add("splits_id36", false, "Entering Castle", "splits_stage_12");
-    settings.Add("splits_id37", false, "Inside Castle", "splits_stage_12");
-    settings.Add("splits_id38", false, "Ms. Y", "splits_stage_12");
-    settings.Add("splits_id39", true, "Ms. Y, Mr. Y and Y Mecha", "splits_stage_12");
+
+    settings.Add("start_llenge_01_bossrun_v3", false, "Boss Rush", "start");
+    settings.Add("splits_stage1_1", false, "Streets", "splits_stage1");
+    settings.Add("splits_stage1_2", false, "Sewers", "splits_stage1");
+    settings.Add("splits_stage1_3", true, "Diva", "splits_stage1");
+    settings.Add("splits_stage2_1", false, "Jail", "splits_stage2");
+    settings.Add("splits_stage2_2", false, "HQ", "splits_stage2");
+    settings.Add("splits_stage2_3", true, "Commissioner", "splits_stage2");
+    settings.Add("splits_stage3_1a", false, "Outside", "splits_stage3");
+    settings.Add("splits_stage3_1b", false, "Inside", "splits_stage3");
+    settings.Add("splits_stage3_1c", false, "Hallway", "splits_stage3");
+    settings.Add("splits_stage3_2", true, "Nora", "splits_stage3");
+    settings.Add("splits_stage4_1", false, "Pier", "splits_stage4");
+    settings.Add("splits_stage4_bossMusic", false, "Estel Start", "splits_stage4");
+    settings.Add("splits_stage4_2", true, "Estel", "splits_stage4");
+    settings.Add("splits_stage5_1", false, "Underground", "splits_stage5");
+    settings.Add("splits_stage5_2", false, "Bar", "splits_stage5");
+    settings.Add("splits_stage5_3", true, "Barbon", "splits_stage5");
+    settings.Add("splits_stage6_1", false, "Streets", "splits_stage6");
+    settings.Add("splits_stage6_2a", false, "Dojo - Galsia Room", "splits_stage6");
+    settings.Add("splits_stage6_2b", false, "Dojo - Donovan Room", "splits_stage6");
+    settings.Add("splits_stage6_2c", false, "Dojo - Pheasant Room", "splits_stage6");
+    settings.Add("splits_stage6_3", true, "Shiva", "splits_stage6");
+    settings.Add("splits_stage7_bossMusic", false, "Estel Start", "splits_stage7");
+    settings.Add("splits_stage7_1", true, "Estel", "splits_stage7");
+    settings.Add("splits_stage8_1", false, "Gallery", "splits_stage8");
+    settings.Add("splits_stage8_2", true, "Beyo and Riha", "splits_stage8");
+    settings.Add("splits_stage9_1", false, "Sauna", "splits_stage9");
+    settings.Add("splits_stage9_2", false, "Elevator", "splits_stage9");
+    settings.Add("splits_stage9_3", true, "Max", "splits_stage9");
+    settings.Add("splits_stage10_1a", false, "Rooftops - Arrival", "splits_stage10");
+    settings.Add("splits_stage10_1b", false, "Rooftops - Advance", "splits_stage10");
+    settings.Add("splits_stage10_1c", false, "Rooftops - Wrecking Balls", "splits_stage10");
+    settings.Add("splits_stage10_3", true, "DJ K-Washi", "splits_stage10");
+    settings.Add("splits_stage11_1", false, "Platform ", "splits_stage11");
+    settings.Add("splits_stage11_2a", false, "Boarding the Airplane", "splits_stage11");
+    settings.Add("splits_stage11_2b", false, "Inside the Airplane", "splits_stage11");
+    settings.Add("splits_stage11_3", true, "Mr. Y", "splits_stage11");
+    settings.Add("splits_stage12_1", false, "Wreckage", "splits_stage12");
+    settings.Add("splits_stage12_2a", false, "Entering Castle", "splits_stage12");
+    settings.Add("splits_stage12_2b", false, "Inside Castle", "splits_stage12");
+    settings.Add("splits_stage12_2c", false, "Ms. Y", "splits_stage12");
+    settings.Add("splits_stage12_3", true, "Ms. Y, Mr. Y and Y Mecha", "splits_stage12");
+    settings.Add("splits_bossRush", true, "Boss Rush", "splits");
+    settings.Add("splits_bossRush_newBoss", true, "Boss Defeated", "splits_bossRush");
 
 
     vars.gameTimeUpdateStopwatch = new Stopwatch();
     vars.gameTimeUpdateStopwatch.Start();
-    vars.splitsDelay = new Stopwatch(); // slight splits delay to make sure it's done when the IGT is fully stopped
-    vars.totalFrameCounterUpdates = 0; // serves as a split ID depending on how many times totalFrameCount has been updated (in every laoding screen and end of stage)
-    vars.totalFrameCountBackup = 0; // saves current value of the total frame counter when it goes up
     vars.splitNow = false;
+    vars.totalFrameCountBackup = 0; // saves current value of the total frame counter when it goes up
+    vars.currentLevel = "";
 
-    vars.splitActions = (EventHandler)((s, e) => {
-        vars.splitNow = false;
-        vars.splitsDelay.Reset();
+    vars.startActions = (EventHandler)((s, e) => {
+        vars.totalFrameCountBackup = 0;
     });
-    timer.OnSplit += vars.splitActions;
-
+    timer.OnStart += vars.startActions;
 }
 
 init{
@@ -87,36 +101,38 @@ init{
     }
 
     vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
+
 }
 
 update{
+    if (vars.splitNow){
+        vars.splitNow = false;
+    }
 
     vars.updatedGameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
-    // gameTime updates when the new update is in a reasonable range (in case the pointers show bad data), when the update time is a lower number than gameTime and 0.5 have passed without an update (reset), or when the update time is a higher number than gameTime and 10 have passed without an update (stuck, rare)
-    if (vars.gameTime + 1000 > vars.updatedGameTime && vars.gameTime - 1000 < vars.updatedGameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 500 && vars.updatedGameTime < vars.gameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 10000 && vars.updatedGameTime > vars.gameTime){
+    // gameTime updates when the new update is in a reasonable range (in case the pointers show bad data), or when gameTime hasn't been updated for a while, also the pause menu open prevents updates (the pointers sometimes mess up while the game is unpausing) 
+    if ((vars.gameTime + 1000 > vars.updatedGameTime && vars.gameTime - 1000 < vars.updatedGameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 500 && vars.updatedGameTime < vars.gameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 10000 && vars.updatedGameTime > vars.gameTime) && current.submenusOpen == 0){
         vars.gameTime = vars.updatedGameTime;
         vars.gameTimeUpdateStopwatch.Restart();
 
-        // variables for splitting update when gameTime updates and the total frames counter updates (using a backup variable to avoid reading bad data)
-        if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup || vars.totalFrameCounterUpdates == 0 && current.totalFrameCount != 0 && old.totalFrameCount == 0){
-            vars.totalFrameCounterUpdates += 1;
+        // the "total frames counter" backup gets updated when gameTime gets updated and it's lower then the value in memory, this also triggers splits
+        if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup){
             vars.totalFrameCountBackup = current.totalFrameCount;
             vars.splitNow = true;
-            vars.splitsDelay.Start();
         }
+    }
 
-        // split variables reset when the IGT starts from 0
-        if (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0){
-            vars.totalFrameCounterUpdates = 0;
-            vars.totalFrameCountBackup = 0;
-            vars.splitNow = false;
-        }
+    // the current level is saved here to avoid having a null name screwing up splits
+    if (current.levelName != old.levelName && current.levelName != null){
+        vars.currentLevel = current.levelName;
+        vars.UpdateTextComponent("level", current.levelName);
     }
 
 }
 
 start{
-    return current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0;
+    return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0 && settings["start_any"]) 
+        || (current.levelName != old.levelName && current.levelName != null && settings["start_" + current.levelName]);
 }
 
 reset{
@@ -132,9 +148,12 @@ gameTime{
 }
 
 split{
-    return vars.splitNow && settings["splits_id" + vars.totalFrameCounterUpdates] && vars.splitsDelay.ElapsedMilliseconds > 51;
+    return vars.splitNow && settings["splits_" + vars.currentLevel]
+        || current.currentMusic != old.currentMusic && (old.currentMusic != null && old.currentMusic.Contains("BossRush") && current.submenusOpen == 0 && settings["splits_bossRush_newBoss"]
+                                                    || old.currentMusic == "Music_Level04!G00_end" && current.currentMusic == "Music_Level04!BOSS" && settings["splits_stage4_bossMusic"]
+                                                    || old.currentMusic == "Music_Level07!C00_LastWave" && current.currentMusic == "Music_Level07!BOSS" && settings["splits_stage7_bossMusic"]);
 }
 
-shutdown {
-    timer.OnSplit -= vars.splitActions;
+shutdown{
+    timer.OnStart -= vars.startActions;
 }
