@@ -68,7 +68,7 @@ startup{
     settings.Add("splits_stage12_2b", false, "Inside Castle", "splits_stage12");
     settings.Add("splits_stage12_2c", false, "Ms. Y", "splits_stage12");
     settings.Add("splits_stage12_3", true, "Ms. Y, Mr. Y and Y Mecha", "splits_stage12");
-    settings.Add("splits_bossRush", false, "Boss Rush", "splits");
+    settings.Add("splits_bossRush", true, "Boss Rush", "splits");
     settings.Add("splits_bossRush_newBoss", true, "Boss Defeated", "splits_bossRush");
 
 
@@ -102,35 +102,6 @@ init{
 
     vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
 
-
-
-
-
-
-
-    // updates a text component in the layout, also creates it if it doesn't exist
-    Action <string, string> UpdateTextComponent = (string name, string updatedText) => {
-        bool foundComponent = false;
-        foreach (dynamic component in timer.Layout.Components){
-            if (component.GetType().Name != "TextComponent" || component.Settings.Text1 != name) continue;
-            component.Settings.Text2 = updatedText;
-            foundComponent = true;
-            break;
-        }
-        if (!foundComponent) vars.CreateTextComponent(name, updatedText);
-    };
-    vars.UpdateTextComponent = UpdateTextComponent;
-
-    // creates a text component, used when UpdateTextComponent doens't find the text component requested
-    Action <string, string> CreateTextComponent = (string textLeft, string textRight) => {
-        var textComponentAssembly = Assembly.LoadFrom("Components\\LiveSplit.Text.dll");
-        dynamic textComponent = Activator.CreateInstance(textComponentAssembly.GetType("LiveSplit.UI.Components.TextComponent"), timer);
-        timer.Layout.LayoutComponents.Add(new LiveSplit.UI.Components.LayoutComponent("LiveSplit.Text.dll", textComponent as LiveSplit.UI.Components.IComponent));
-        textComponent.Settings.Text1 = textLeft;
-        textComponent.Settings.Text2 = textRight;
-    };
-    vars.CreateTextComponent = CreateTextComponent;
-
 }
 
 update{
@@ -156,14 +127,6 @@ update{
         vars.currentLevel = current.levelName;
         vars.UpdateTextComponent("level", current.levelName);
     }
-
-    if (current.currentMusic != old.currentMusic){
-        if (current.currentMusic != null){
-            vars.UpdateTextComponent("music", current.currentMusic);
-        }
-        print ("ASL music:" + current.currentMusic);
-    }
-
 
 }
 
