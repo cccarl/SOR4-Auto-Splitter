@@ -125,14 +125,13 @@ update{
     // the current level is saved here to avoid having a null name screwing up splits
     if (current.levelName != old.levelName && current.levelName != null){
         vars.currentLevel = current.levelName;
-        vars.UpdateTextComponent("level", current.levelName);
     }
 
 }
 
 start{
     return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0 && settings["start_any"]) 
-        || (current.levelName != old.levelName && current.levelName != null && settings["start_" + current.levelName]);
+        || (current.levelName != old.levelName && settings["start_" + current.levelName]);
 }
 
 reset{
