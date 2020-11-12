@@ -72,8 +72,11 @@ startup{
     settings.Add("splits_bossRush_newBoss", true, "Boss Defeated", "splits_bossRush");
 
 
+    vars.timerModel = new TimerModel { CurrentState = timer }; // to use the undo split function
     vars.gameTimeUpdateStopwatch = new Stopwatch();
     vars.gameTimeUpdateStopwatch.Start();
+    vars.undoSplitStopwatch = new Stopwatch();
+    vars.undoSplitStopwatch.Start();
     vars.splitNow = false;
     vars.totalFrameCountBackup = 0; // saves current value of the total frame counter when it goes up
     vars.currentLevel = "";
@@ -82,6 +85,11 @@ startup{
         vars.totalFrameCountBackup = 0;
     });
     timer.OnStart += vars.startActions;
+
+    vars.splitActions = (EventHandler)((s, e) => {
+        vars.undoSplitStopwatch.Restart();
+    });
+    timer.OnSplit += vars.splitActions;
 }
 
 init{
@@ -105,6 +113,12 @@ init{
 }
 
 update{
+    // very rarely a wrong split is triggered when pausing the game, this undoes it
+    if (vars.undoSplitStopwatch.ElapsedMilliseconds < 150 && current.submenusOpen != 0 && old.submenusOpen == 0){
+        vars.timerModel.UndoSplit();
+        print("ASL Split Undone!!!!");
+    }
+
     if (vars.splitNow){
         vars.splitNow = false;
     }
@@ -155,4 +169,5 @@ split{
 
 shutdown{
     timer.OnStart -= vars.startActions;
+    timer.OnSplit -= vars.splitActions;
 }
