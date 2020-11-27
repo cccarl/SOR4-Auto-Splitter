@@ -69,7 +69,8 @@ startup{
     settings.Add("splits_stage12_2c", false, "Ms. Y", "splits_stage12");
     settings.Add("splits_stage12_3", true, "Ms. Y, Mr. Y and Y Mecha", "splits_stage12");
     settings.Add("splits_bossRush", true, "Boss Rush", "splits");
-    settings.Add("splits_bossRush_newBoss", true, "Boss Defeated", "splits_bossRush");
+    settings.Add("splits_bossRush_newBoss", false, "Boss Defeated", "splits_bossRush");
+    settings.Add("splits_llenge_01_bossrun_v3", true, "Boss Rush Completed", "splits_bossRush");
 
 
     vars.timerModel = new TimerModel { CurrentState = timer }; // to use the undo split function
@@ -124,13 +125,13 @@ update{
     }
 
     vars.updatedGameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
-    // gameTime updates when the new update is in a reasonable range (in case the pointers show bad data), or when gameTime hasn't been updated for a while, also the pause menu open prevents updates (the pointers sometimes mess up while the game is unpausing) 
-    if ((vars.gameTime + 1000 > vars.updatedGameTime && vars.gameTime - 1000 < vars.updatedGameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 500 && vars.updatedGameTime < vars.gameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 10000 && vars.updatedGameTime > vars.gameTime) && current.submenusOpen == 0){
+    // gameTime updates when the new update is in a reasonable range (in case the pointers show bad data), or when gameTime hasn't been updated for a while
+    if (vars.gameTime + 1000 > vars.updatedGameTime && vars.gameTime - 1000 < vars.updatedGameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 500 && vars.updatedGameTime < vars.gameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 10000 && vars.updatedGameTime > vars.gameTime){
         vars.gameTime = vars.updatedGameTime;
         vars.gameTimeUpdateStopwatch.Restart();
 
-        // the "total frames counter" backup gets updated when gameTime gets updated and it's lower then the value in memory, this also triggers splits
-        if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup){
+        // the "total frames counter" backup gets updated when gameTime gets updated and it's lower than the value in memory, this also triggers splits, also the game has to be unpaused (without this, rarely this would trigger splits while unpausing the game)
+        if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup && current.submenusOpen == 0){
             vars.totalFrameCountBackup = current.totalFrameCount;
             vars.splitNow = true;
         }
@@ -162,7 +163,7 @@ gameTime{
 
 split{
     return vars.splitNow && settings["splits_" + vars.currentLevel]
-        || current.currentMusic != old.currentMusic && (old.currentMusic != null && old.currentMusic.Contains("BossRush") && current.submenusOpen == 0 && settings["splits_bossRush_newBoss"]
+        || current.currentMusic != old.currentMusic && (old.currentMusic != null && current.currentMusic != null && old.currentMusic.Contains("BossRush") && current.currentMusic.Contains("BossRush") && settings["splits_bossRush_newBoss"]
                                                     || old.currentMusic == "Music_Level04!G00_end" && current.currentMusic == "Music_Level04!BOSS" && settings["splits_stage4_bossMusic"]
                                                     || old.currentMusic == "Music_Level07!C00_LastWave" && current.currentMusic == "Music_Level07!BOSS" && settings["splits_stage7_bossMusic"]);
 }
