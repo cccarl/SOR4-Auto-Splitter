@@ -6,6 +6,14 @@ state("SOR4", "V05-s r11096"){
     string40 levelName : 0x01443878, 0x0, 0x60, 0x8, 0x28, 0x10, 0x88, 0x3E;
 }
 
+state("SOR4", "V04-s r10977"){
+    int submenusOpen : 0x014349D8, 0x0, 0x68, 0x28;
+    int currentSectionFrames : 0x01439470, 0x90, 0x30;
+    int totalFrameCount : 0x01439470, 0xA0, 0x48;
+    string100 currentMusic : 0x01439470, 0x90, 0x20, 0xC;
+    string40 levelName : 0x01439470, 0x98, 0x10, 0x110, 0x3E;
+    }
+
 startup{
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
 
@@ -94,7 +102,20 @@ startup{
 }
 
 init{
-    if (timer.CurrentTimingMethod == TimingMethod.RealTime && settings["gameTimeMsg"]){
+
+    // MD5 code by CptBrian.
+    string MD5Hash;
+    using (var md5 = System.Security.Cryptography.MD5.Create())
+        using (var s = File.Open(modules.First().FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            MD5Hash = md5.ComputeHash(s).Select(x => x.ToString("X2")).Aggregate((a, b) => a + b);
+
+    switch (MD5Hash) {
+        case "5D6586DFD557C55CCBEF526AA76540A2": version = "V05-s r11096"; break;
+        case "CB932B1FC191DCD442BA5381BE58C8D7": version = "V04-s r10977"; break;
+        default: version = "Not Supported"; break;
+    }
+
+    if (timer.CurrentTimingMethod == TimingMethod.RealTime && settings["gameTimeMsg"] && version != "Not Supported"){
         var message = MessageBox.Show(
             "Would you like to change the current timing method to\nGame Time instead of Real Time?", 
             "LiveSplit | SOR4 Auto Splitter", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -104,13 +125,7 @@ init{
         }
     }
 
-    switch (modules.First().ModuleMemorySize) {
-        case 0x15B1000: version = "V05-s r11096"; break;
-        default: version = "Not Supported"; break;
-    }
-
     vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
-
 }
 
 update{
@@ -145,7 +160,7 @@ update{
 }
 
 start{
-    return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && current.totalFrameCount == 0 && settings["start_any"]) 
+    return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && old.currentSectionFrames < current.currentSectionFrames && current.totalFrameCount == 0 && settings["start_any"]) 
         || (current.levelName != old.levelName && settings["start_" + current.levelName]);
 }
 
