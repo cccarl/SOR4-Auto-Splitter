@@ -1,3 +1,11 @@
+state("SOR4", "V07-s r13031"){
+    int submenusOpen : 0x014C1A90, 0x0, 0x78, 0x28;
+    int currentSectionFrames : 0x014C1E08, 0x0, 0xB8, 0x38;
+    int totalFrameCount : 0x014C1E18, 0x0, 0x78, 0x10, 0x2C;
+    string100 currentMusic : 0x0144B570, 0x38, 0x30, 0x20, 0x90, 0x20, 0xC; // wip
+    string40 levelName : 0x01443878, 0x0, 0x60, 0x8, 0x28, 0x10, 0x88, 0x3E; // wip
+}
+
 state("SOR4", "V05-s r11096"){
     int submenusOpen : 0x01444058, 0x0, 0x68, 0x28;
     int currentSectionFrames : 0x01448B00, 0x90, 0x30;
@@ -12,15 +20,15 @@ state("SOR4", "V04-s r10977"){
     int totalFrameCount : 0x01439470, 0xA0, 0x48;
     string100 currentMusic : 0x01439470, 0x90, 0x20, 0xC;
     string40 levelName : 0x01439470, 0x98, 0x10, 0x110, 0x3E;
-    }
+}
 
 startup{
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
 
     settings.Add("start", true, "Auto Start");
-    settings.Add("start_any", true, "Any Stage", "start");
+    settings.Add("start_any", true, "Any Stage (Only option available for V07 for now)", "start");
     settings.SetToolTip("start_any", "Also for Boss Rush");
-    settings.Add("splits", true, "Auto Splits");
+    settings.Add("splits", true, "Auto Splits (Not available for V07 yet)");
 
     string[] stageNames = new string[12] {"The Streets", "Police Precinct", "Cargo Ship", "Old Pier", "Underground", "Chinatown", "Skytrain", "Art Gallery", "Y Tower", "To The Concert", "Airplane", "Y Island"};
 
@@ -110,6 +118,7 @@ init{
             MD5Hash = md5.ComputeHash(s).Select(x => x.ToString("X2")).Aggregate((a, b) => a + b);
 
     switch (MD5Hash) {
+		case "C8C37201A021AF3916E4109D49E53F2C": version = "V07-s r13031"; break;
         case "5D6586DFD557C55CCBEF526AA76540A2": version = "V05-s r11096"; break;
         case "CB932B1FC191DCD442BA5381BE58C8D7": version = "V04-s r10977"; break;
         default: version = "Not Supported"; break;
