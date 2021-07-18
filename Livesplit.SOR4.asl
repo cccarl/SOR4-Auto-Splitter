@@ -118,7 +118,7 @@ init{
             MD5Hash = md5.ComputeHash(s).Select(x => x.ToString("X2")).Aggregate((a, b) => a + b);
 
     switch (MD5Hash) {
-	case "C8C37201A021AF3916E4109D49E53F2C": version = "V07-s r13031"; break;
+        case "C8C37201A021AF3916E4109D49E53F2C": version = "V07-s r13031"; break;
         case "5D6586DFD557C55CCBEF526AA76540A2": version = "V05-s r11096"; break;
         case "CB932B1FC191DCD442BA5381BE58C8D7": version = "V04-s r10977"; break;
         default: version = "Not Supported"; break;
