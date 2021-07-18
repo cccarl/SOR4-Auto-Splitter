@@ -2,6 +2,7 @@ state("SOR4", "V07-s r13031"){
     int submenusOpen : 0x014C1A90, 0x0, 0x78, 0x28;
     int currentSectionFrames : 0x014C1E08, 0x0, 0xB8, 0x38;
     int totalFrameCount : 0x014C1E18, 0x0, 0x78, 0x10, 0x2C;
+    int totalFrameCountSurvival : 0x014C1E18, 0x0, 0x78, 0x10, 0x14;
     string100 currentMusic : 0x014C1E10, 0x0, 0x90, 0x28, 0xC; // Needs more testing
     string40 levelName : 0x014C1E10, 0x0, 0x90, 0x18, 0x108, 0x3E;
 }
@@ -26,8 +27,8 @@ startup{
     settings.Add("gameTimeMsg", true, "Ask if Game Time should be used when the game opens");
 
     settings.Add("start", true, "Auto Start");
-    settings.Add("start_any", true, "Any Stage (Only option available for V07 for now)", "start");
-    settings.SetToolTip("start_any", "Also for Boss Rush");
+    settings.Add("start_any", true, "Any Stage", "start");
+    settings.SetToolTip("start_any", "Also for Boss Rush and Survival");
     settings.Add("splits", true, "Auto Splits");
 
     string[] stageNames = new string[12] {"The Streets", "Police Precinct", "Cargo Ship", "Old Pier", "Underground", "Chinatown", "Skytrain", "Art Gallery", "Y Tower", "To The Concert", "Airplane", "Y Island"};
@@ -87,6 +88,7 @@ startup{
     settings.Add("splits_bossRush", true, "Boss Rush", "splits");
     settings.Add("splits_bossRush_newBoss", false, "Boss Defeated", "splits_bossRush");
     settings.Add("splits_llenge_01_bossrun_v3", true, "Boss Rush Completed", "splits_bossRush");
+    settings.Add("splits_survival", false, "Survival Mode Level Complete", "splits");
 
 
     vars.timerModel = new TimerModel { CurrentState = timer }; // to use the undo split function
@@ -97,6 +99,7 @@ startup{
     vars.splitNow = false;
     vars.totalFrameCountBackup = 0; // saves current value of the total frame counter when it goes up
     vars.currentLevel = "";
+    vars.mode = "normal";
 
     vars.startActions = (EventHandler)((s, e) => {
         vars.totalFrameCountBackup = 0;
@@ -107,6 +110,19 @@ startup{
         vars.undoSplitStopwatch.Restart();
     });
     timer.OnSplit += vars.splitActions;
+
+
+    // check if the game is in arcade/stage mode or survival
+    Func <string, string> CurrentModeCheck = (string levelName) => {
+        if (levelName.Contains("stage") || levelName.Contains("boss")){
+            return "normal";
+        }
+        else {
+            return "survival";
+        }
+    };
+    vars.CurrentModeCheck = CurrentModeCheck;
+
 }
 
 init{
@@ -134,7 +150,17 @@ init{
         }
     }
 
-    vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
+    // check the current game mode
+    if (current.levelName != null){
+        vars.mode = vars.CurrentModeCheck(current.levelName);
+    }
+    // calculate the updated game time using the game mode
+    if (vars.mode == "normal"){
+        vars.gameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
+    }
+    else if (vars.mode == "survival"){
+        vars.gameTIme = (current.currentSectionFrames + current.totalFrameCountSurvival) * 1000/60;
+    }
 }
 
 update{
@@ -148,7 +174,18 @@ update{
         vars.splitNow = false;
     }
 
-    vars.updatedGameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
+    if (current.levelName != null && current.levelName != old.levelName){
+        vars.mode = vars.CurrentModeCheck(current.levelName);
+    }
+
+    // calculate the updated game time using the game mode
+    if (vars.mode == "normal"){
+        vars.updatedGameTime = (current.currentSectionFrames + current.totalFrameCount) * 1000/60;
+    }
+    else if (vars.mode == "survival"){
+        vars.updatedGameTime = (current.currentSectionFrames + current.totalFrameCountSurvival) * 1000/60;
+    }
+    
     // gameTime updates when the new update is in a reasonable range (in case the pointers show bad data), or when gameTime hasn't been updated for a while
     if (vars.gameTime + 1000 > vars.updatedGameTime && vars.gameTime - 1000 < vars.updatedGameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 500 && vars.updatedGameTime < vars.gameTime || vars.gameTimeUpdateStopwatch.ElapsedMilliseconds > 10000 && vars.updatedGameTime > vars.gameTime){
         vars.gameTime = vars.updatedGameTime;
@@ -169,7 +206,7 @@ update{
 }
 
 start{
-    return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && old.currentSectionFrames < current.currentSectionFrames && current.totalFrameCount == 0 && settings["start_any"]) 
+    return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && old.currentSectionFrames < current.currentSectionFrames && settings["start_any"]) 
         || (current.levelName != old.levelName && settings["start_" + current.levelName]);
 }
 
@@ -187,6 +224,7 @@ gameTime{
 
 split{
     return vars.splitNow && settings["splits_" + vars.currentLevel]
+        || current.totalFrameCountSurvival > old.totalFrameCountSurvival && settings["splits_survival"]
         || current.currentMusic != old.currentMusic && (old.currentMusic != null && current.currentMusic != null && old.currentMusic.Contains("BossRush") && current.currentMusic.Contains("BossRush") && settings["splits_bossRush_newBoss"]
                                                     || old.currentMusic == "Music_Level04!G00_end" && current.currentMusic == "Music_Level04!BOSS" && settings["splits_stage4_bossMusic"]
                                                     || old.currentMusic == "Music_Level07!C00_LastWave" && current.currentMusic == "Music_Level07!BOSS" && settings["splits_stage7_bossMusic"]);
