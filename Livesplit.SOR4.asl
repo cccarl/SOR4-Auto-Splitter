@@ -198,10 +198,19 @@ update{
         vars.gameTime = vars.updatedGameTime;
         vars.gameTimeUpdateStopwatch.Restart();
 
-        // the "total frames counter" backup gets updated when gameTime gets updated and it's lower than the value in memory, this also triggers splits, also the game has to be unpaused (without this, rarely this would trigger splits while unpausing the game)
-        if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup && current.submenusOpen == 0){
-            vars.totalFrameCountBackup = current.totalFrameCount;
-            vars.splitNow = true;
+        if (vars.mode == "normal"){
+            // the "total frames counter" backup gets updated when gameTime gets updated and it's lower than the value in memory, this also triggers splits, also the game has to be unpaused (without this, rarely this would trigger splits while unpausing the game)
+            if (old.totalFrameCount != 0 && current.totalFrameCount > vars.totalFrameCountBackup && current.submenusOpen == 0){
+                vars.totalFrameCountBackup = current.totalFrameCount;
+                vars.splitNow = true;
+            }
+        }
+        else {
+            // same as last if but for survival
+            if (old.totalFrameCountSurvival != 0 && current.totalFrameCountSurvival > vars.totalFrameCountBackup && current.submenusOpen == 0){
+                vars.totalFrameCountBackup = current.totalFrameCountSurvival;
+                vars.splitNow = true;
+            }
         }
     }
 
@@ -230,8 +239,7 @@ gameTime{
 }
 
 split{
-    return vars.splitNow && settings["splits_" + vars.currentLevel]
-        || current.totalFrameCountSurvival > old.totalFrameCountSurvival && settings["splits_survival"]
+    return vars.splitNow && (settings["splits_" + vars.currentLevel] || settings["splits_survival"])
         || current.currentMusic != old.currentMusic && (old.currentMusic != null && current.currentMusic != null && old.currentMusic.Contains("BossRush") && current.currentMusic.Contains("BossRush") && settings["splits_bossRush_newBoss"]
                                                     || old.currentMusic == "Music_Level04!G00_end" && current.currentMusic == "Music_Level04!BOSS" && settings["splits_stage4_bossMusic"]
                                                     || old.currentMusic == "Music_Level07!C00_LastWave" && current.currentMusic == "Music_Level07!BOSS" && settings["splits_stage7_bossMusic"]);
