@@ -222,8 +222,10 @@ update{
 }
 
 start{
-    return (current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && old.currentSectionFrames < current.currentSectionFrames && settings["start_any"]) 
-        || (current.levelName != old.levelName && settings["start_" + current.levelName]);
+    // (start when timer runs at any stage || start when entering specific stage) && don't start in training mode
+    return ((current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && old.currentSectionFrames < current.currentSectionFrames && settings["start_any"])
+        || (current.levelName != old.levelName && settings["start_" + current.levelName]))
+        && current.levelName != null && current.levelName != "" && !current.levelName.Contains("training");
 }
 
 reset{
