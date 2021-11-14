@@ -1,10 +1,10 @@
 state("SOR4", "V07-s r13060M"){
-    int submenusOpen : 0x014BFA10, 0x0, 0x78, 0x28;
-    int currentSectionFrames : 0x014BFD88, 0x0, 0xB8, 0x38;
-    int totalFrameCount : 0x014BFD88, 0x0, 0xD8, 0x10, 0x2C;
-    int totalFrameCountSurvival : 0x014BFD88, 0x0, 0xD8, 0x10, 0x14;
-    string100 currentMusic : 0x014BFD90, 0x0, 0x80, 0x28, 0xC;
-    string40 levelName : 0x014BFD90, 0x0, 0x80, 0x18, 0x108, 0x3E;
+    int submenusOpen :            0x014BFA10, 0x0, 0x78, 0x28;
+    int currentSectionFrames :    0x014BFD90, 0x8, 0xB8, 0x38;
+    int totalFrameCount :         0x014BFD90, 0x8, 0xD8, 0x10, 0x2C;
+    int totalFrameCountSurvival : 0x014BFD90, 0x8, 0xD8, 0x10, 0x14;
+    string100 currentMusic :      0x014BFD90, 0x0, 0x80, 0x28, 0xC;
+    string40 levelName :          0x014BFD90, 0x0, 0x80, 0x18, 0x108, 0x3E;
 }
 
 state("SOR4", "V07-s r13031"){
@@ -12,7 +12,7 @@ state("SOR4", "V07-s r13031"){
     int currentSectionFrames : 0x014C1E08, 0x0, 0xB8, 0x38;
     int totalFrameCount : 0x014C1E18, 0x0, 0x78, 0x10, 0x2C;
     int totalFrameCountSurvival : 0x014C1E18, 0x0, 0x78, 0x10, 0x14;
-    string100 currentMusic : 0x014C1E10, 0x0, 0x90, 0x28, 0xC; // Needs more testing
+    string100 currentMusic : 0x014C1E10, 0x0, 0x90, 0x28, 0xC;
     string40 levelName : 0x014C1E10, 0x0, 0x90, 0x18, 0x108, 0x3E;
 }
 
@@ -143,7 +143,7 @@ init{
             MD5Hash = md5.ComputeHash(s).Select(x => x.ToString("X2")).Aggregate((a, b) => a + b);
 
     switch (MD5Hash) {
-        case "7304F3FF9873D13F4321CB88FC5ABEEF": version =  "V07-s r13060M"; break;
+        case "7304F3FF9873D13F4321CB88FC5ABEEF": version = "V07-s r13060M"; break;
         case "C8C37201A021AF3916E4109D49E53F2C": version = "V07-s r13031"; break;
         case "5D6586DFD557C55CCBEF526AA76540A2": version = "V05-s r11096"; break;
         case "CB932B1FC191DCD442BA5381BE58C8D7": version = "V04-s r10977"; break;
