@@ -3,10 +3,9 @@ state("SOR4", "V07-s r13648"){
     int currentSectionFrames :    0x014BFE38, 0x10, 0xA8, 0x38; // find by using the score and the mem viewer, same struct, careful with "fake" igt that doesn't update while jumping (yes that's a thing)
     int totalFrameCount :         0x014BFE38, 0x0, 0x78, 0x10, 0x2C; // find by speedhack slowmo and telling livesplit to print the time right before a loading screen triggers, this address doesn't change on level reload
     int totalFrameCountSurvival : 0x014BFE38, 0x0, 0x78, 0x10, 0x14; // find by simply changing the normal mode total igt last offset
-
-    // not working 
-    string100 currentMusic :      0x014BFD90, 0x0, 0x80, 0x28, 0xC; // help
-    string40 levelName :          0x014BFD90, 0x0, 0x80, 0x18, 0x108, 0x3E; //help
+    // music and level names by honganqi 
+    string100 currentMusic :      0x014BFE30, 0x0, 0x70, 0x28, 0xC; // enter level 12, search for utf-16 stringMusic_Level12!A00_A and pointer scan
+    string40 levelName :          0x014BFE30, 0x0, 0x70, 0x18, 0x108, 0x3E; // enter boss rush, search for the utf-16 string "levels/challenges/lvl_challenge_01_bossrun_v3", freeze game and pointer scan, note that last offset is custom to shorten the string
 
 }
 
@@ -50,7 +49,7 @@ startup{
     settings.Add("start", true, "Auto Start");
     settings.Add("start_any", true, "Any Stage", "start");
     settings.SetToolTip("start_any", "Also for Boss Rush and Survival");
-    settings.Add("splits", true, "Auto Splits (NOT WORKING ON CURRENT PATCH YET)");
+    settings.Add("splits", true, "Auto Splits");
 
     string[] stageNames = new string[12] {"The Streets", "Police Precinct", "Cargo Ship", "Old Pier", "Underground", "Chinatown", "Skytrain", "Art Gallery", "Y Tower", "To The Concert", "Airplane", "Y Island"};
 
@@ -194,14 +193,9 @@ update{
         vars.splitNow = false;
     }
 
-
-
-    // ignored on current patch for now
-    if (version != "V07-s r13648" && current.levelName != null && current.levelName != old.levelName){
+    if (current.levelName != null && current.levelName != old.levelName){
         vars.mode = vars.CurrentModeCheck(current.levelName);
     }
-
-
 
     // calculate the updated game time using the game mode
     if (vars.mode == "normal"){
@@ -243,7 +237,7 @@ start{
     // (start when timer runs at any stage || start when entering specific stage) && don't start in training mode
     return ((current.currentSectionFrames > 0 && current.currentSectionFrames < 60 && old.currentSectionFrames < current.currentSectionFrames && settings["start_any"])
         || (current.levelName != old.levelName && settings["start_" + current.levelName]))
-        /*&& current.levelName != null && current.levelName != "" && !current.levelName.Contains("training")*/;
+         && current.levelName != null && current.levelName != "" && !current.levelName.Contains("training");
 }
 
 reset{
