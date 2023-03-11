@@ -1,11 +1,22 @@
+state("SOR4", "V08-s r14424"){
+    int submenusOpen :            0x014DCDF8, 0x0, 0x78, 0x28; // find by just pausing and using submenus
+    int currentSectionFrames :    0x014DD180, 0x10, 0xA8, 0x40; // find by using the score and the mem viewer, same struct, careful with "fake" igt that doesn't update while jumping (yes that's a thing), check similar final offset
+    int totalFrameCount :         0x014DD180, 0x0, 0x78, 0x10, 0x2C; // find by speedhack slowmo and telling livesplit to print the time right before a loading screen triggers, this address doesn't change on level reload
+    int totalFrameCountSurvival : 0x014DD180, 0x0, 0x78, 0x10, 0x14; // find by simply changing the normal mode total igt last offset
+    string100 currentMusic :      0x014DD180, 0x0, 0x58, 0x30, 0xC; // enter level 12, search for utf-16 string "Music_Level12!A00_A" and pointer scan
+    // enter boss rush, search for the utf-16 string "levels/challenges/lvl_challenge_01_bossrun_v3", freeze game and pointer scan, note that last offset is custom to shorten the string
+    string40 levelName :          0x014DD180, 0x0, 0x50, 0x20, 0x108, 0x3E; // alternative that actually worked: keep 1st, 4th, 5th (0xC) offsets and play around the 2nd and 3rs ones until you find the text "level..."
+
+}
+
 state("SOR4", "V07-s r13648"){
-    int submenusOpen :            0x014BFAB0, 0x0, 0x78, 0x28;  // find by just pausing and using submenus
-    int currentSectionFrames :    0x014BFE38, 0x10, 0xA8, 0x38; // find by using the score and the mem viewer, same struct, careful with "fake" igt that doesn't update while jumping (yes that's a thing)
-    int totalFrameCount :         0x014BFE38, 0x0, 0x78, 0x10, 0x2C; // find by speedhack slowmo and telling livesplit to print the time right before a loading screen triggers, this address doesn't change on level reload
-    int totalFrameCountSurvival : 0x014BFE38, 0x0, 0x78, 0x10, 0x14; // find by simply changing the normal mode total igt last offset
+    int submenusOpen :            0x014BFAB0, 0x0, 0x78, 0x28;
+    int currentSectionFrames :    0x014BFE38, 0x10, 0xA8, 0x38;
+    int totalFrameCount :         0x014BFE38, 0x0, 0x78, 0x10, 0x2C;
+    int totalFrameCountSurvival : 0x014BFE38, 0x0, 0x78, 0x10, 0x14;
     // music and level names by honganqi 
-    string100 currentMusic :      0x014BFE30, 0x0, 0x70, 0x28, 0xC; // enter level 12, search for utf-16 stringMusic_Level12!A00_A and pointer scan
-    string40 levelName :          0x014BFE38, 0x0, 0x50, 0x18, 0x108, 0x3E; // enter boss rush, search for the utf-16 string "levels/challenges/lvl_challenge_01_bossrun_v3", freeze game and pointer scan, note that last offset is custom to shorten the string
+    string100 currentMusic :      0x014BFE30, 0x0, 0x70, 0x28, 0xC;
+    string40 levelName :          0x014BFE38, 0x0, 0x50, 0x18, 0x108, 0x3E;
 
 }
 
@@ -154,13 +165,19 @@ init{
             MD5Hash = md5.ComputeHash(s).Select(x => x.ToString("X2")).Aggregate((a, b) => a + b);
 
     switch (MD5Hash) {
+        case "249874E3A4BEDB868A40370F6214675D": version = "V08-s r14424"; break;
         case "03CB9F521F900BBCC02081C38D9059C0": version = "V07-s r13648"; break;
         case "7304F3FF9873D13F4321CB88FC5ABEEF": version = "V07-s r13060M"; break;
         case "C8C37201A021AF3916E4109D49E53F2C": version = "V07-s r13031"; break;
         case "5D6586DFD557C55CCBEF526AA76540A2": version = "V05-s r11096"; break;
         case "CB932B1FC191DCD442BA5381BE58C8D7": version = "V04-s r10977"; break;
-        default: version = "Not Supported"; break;
-    }
+        default: {
+            version = "Not Supported";
+            print("Patch not supported, current MD5Hash is: " + MD5Hash);
+            break;
+        }
+    } 
+
 
     if (timer.CurrentTimingMethod == TimingMethod.RealTime && settings["gameTimeMsg"] && version != "Not Supported"){
         var message = MessageBox.Show(
