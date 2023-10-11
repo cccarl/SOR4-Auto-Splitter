@@ -5,7 +5,7 @@ state("SOR4", "V08-s r18163M"){
     int totalFrameCountSurvival : 0x014DD180, 0x0, 0x78, 0x10, 0x14; // find by simply changing the normal mode total igt last offset
     string100 currentMusic :      0x014DD180, 0x0, 0x58, 0x30, 0xC; // enter level 12, search for utf-16 string "Music_Level12!A00_A" and pointer scan
     // enter boss rush, search for the utf-16 string "levels/challenges/lvl_challenge_01_bossrun_v3", freeze game and pointer scan, note that last offset is custom to shorten the string
-    string40 levelName :          0x014DD180, 0x0, 0x50, 0x20, 0x108, 0x3E; // alternative that actually worked: keep 1st, 4th, 5th (0xC) offsets and play around the 2nd and 3rs ones until you find the text "level..."
+    string40 levelName :          0x014DD180, 0x0, 0x58, 0x28, 0x8, 0x10, 0xD8, 0x3E; // alternative that actually worked: keep 1st, 4th, 5th (0xC) offsets and play around the 2nd and 3rs ones until you find the text "level..."
 }
 
 state("SOR4", "V08-s r14424"){
